@@ -8,7 +8,7 @@ class Tile:
         self.name = self._name # Underscore means private
         self.w, self.h = self._w, self._h # Later while rendering, only see in the range of w and h => less processing
         self.size = self._size
-        self.mass = deepcopy(self._mass) # Copy the mass array to avoid modifying the original
+        self.mass = deepcopy(self._mass) # Copy the mass array to avoid modify the original
         self.setOffset()
 
     def setOffset(self): # Skip n rows in x direction to render less
@@ -135,5 +135,5 @@ ALL = [
     Tile_O,
     Tile_S,
     Tile_T,
-    Tile_Z,  # All tiles are added here. This makes it easier to add new tiles in the future.
+    Tile_Z,  # All tiles are stored here
 ]
