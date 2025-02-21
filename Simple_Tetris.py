@@ -3,12 +3,15 @@ pygame.init()
 
 import Game
 
-FPS = 40
+FPS = 15
 
 BOARD_COLS = 10
 BOARD_ROWS = 20
 BLOCK_SIZE = 40
-BORDER_WIDTH = int(BLOCK_SIZE/30)
+BORDER_WIDTH = max(1, int(BLOCK_SIZE/30))
+
+BG_COLOR = "#98E5D9"
+GRID_COLOR = "#FFFFFF"
 
 """
 1. 
@@ -20,8 +23,8 @@ First set BOARD_COLS, BOARD_ROWS, BLOCK_SIZE
 then calc WINDOW_WIDTH, WINDOW_HEIGHT
 """
 
-WINDOW_WIDTH = BOARD_COLS*BLOCK_SIZE
-WINDOW_HEIGHT = BOARD_ROWS*BLOCK_SIZE
+WINDOW_WIDTH = BOARD_COLS * BLOCK_SIZE + BORDER_WIDTH * (BOARD_COLS - 1)
+WINDOW_HEIGHT = BOARD_ROWS * BLOCK_SIZE + BORDER_WIDTH * (BOARD_ROWS - 1)
 
 running = True
 
@@ -60,39 +63,33 @@ while running:
     if pressed[pygame.K_LSHIFT]:
         board.hold()
 
-    window.fill("#98E5D9")
+    window.fill(GRID_COLOR)
 
     for i in range(BOARD_ROWS):
         for j in range(BOARD_COLS):
             if board.board[i][j]: # 1st board is class, second board is list
                 pygame.draw.rect(window, board.board[i][j], 
-                                (j*BLOCK_SIZE + BORDER_WIDTH, 
-                                i*BLOCK_SIZE + BORDER_WIDTH, 
+                                (j*(BLOCK_SIZE + BORDER_WIDTH), 
+                                i*(BLOCK_SIZE + BORDER_WIDTH), 
                                 BLOCK_SIZE - 2*BORDER_WIDTH, 
                                 BLOCK_SIZE - 2*BORDER_WIDTH))
-
-    for i in range(1, BOARD_COLS): # Vertical grid lines
-        pygame.draw.line(window, "#FFFFFF", 
-                            (BLOCK_SIZE*i, 0), 
-                            (BLOCK_SIZE*i, WINDOW_HEIGHT),
-                            )
-        
-    for j in range(1, BOARD_ROWS): # Horizontal grid lines
-        pygame.draw.line(window, "#FFFFFF", 
-                            (0, BLOCK_SIZE*j), 
-                            (WINDOW_WIDTH, BLOCK_SIZE*j),
-                            )
+            else: 
+                pygame.draw.rect(window, BG_COLOR, 
+                                (j*(BLOCK_SIZE + BORDER_WIDTH), 
+                                i*(BLOCK_SIZE + BORDER_WIDTH), 
+                                BLOCK_SIZE - 2*BORDER_WIDTH, 
+                                BLOCK_SIZE - 2*BORDER_WIDTH))
     
     for i in range(board.loadedTiles[0].size):
         for j in range(board.loadedTiles[0].size):
             if board.loadedTiles[0].mass[i][j] == 1:
                 pygame.draw.rect(window, board.loadedTiles[0].color, 
-                                    ((board.cursor_x + j)*BLOCK_SIZE + BORDER_WIDTH, 
-                                    (board.cursor_y + i)*BLOCK_SIZE + BORDER_WIDTH, 
+                                    ((board.cursor_x + j)*(BLOCK_SIZE + BORDER_WIDTH), 
+                                    (board.cursor_y + i)*(BLOCK_SIZE + BORDER_WIDTH), 
                                     BLOCK_SIZE - 2*BORDER_WIDTH, 
                                     BLOCK_SIZE - 2*BORDER_WIDTH))
     
-    board.update(1)
+    board.update()
 
     pygame.display.update()
     clock.tick(FPS)

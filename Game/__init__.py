@@ -43,6 +43,7 @@ class Board:
         if len(self.loadedTiles) < len(Tiles.ALL):
             a = [random.shuffle(Tiles.ALL)]
             self.loadedTiles.extend([tile() for tile in Tiles.ALL])
+
     def checkCollision(self, x:int, y:int, checkD:bool = True, checkL:bool = True, checkR:bool = True) -> bool:
         if checkD: 
             if y + self.loadedTiles[0].size - self.loadedTiles[0].offsetD > self.h: return True
@@ -102,8 +103,8 @@ class Board:
             self.cursor_y += 1
         self.lock(instant = True)
 
-    def update(self, speed):
-        self.fallCounter += speed # Time
+    def update(self):
+        self.fallCounter += 1 # Time
         if self.fallCounter == FALL_DELAY: # Means time to fall
             self.fallCounter = 0
             self.fall()
@@ -112,17 +113,33 @@ class Board:
         if not self.checkCollision(self.cursor_x + direction, self.cursor_y, checkD = True, checkL = True, checkR = True):
             self.cursor_x += direction
     
-    def kick(self):
-        pass
+    def kick(self, direction: int):
+        # No kick needed
+        if not self.checkCollision(self.cursor_x, self.cursor_y):
+            return True
+        # Check down
+        if not self.checkCollision(self.cursor_x, self.cursor_y+1):
+            self.cursor_y += 1
+            return True
+        # Check opposite side of rotation
+        if not self.checkClear(self.cursor_x - direction, self.cursor_y):
+            self.cursor_x -= direction
+            return True
+        # Check same side of rotation
+        if not self.checkClear(self.cursor_x + direction, self.cursor_y):
+            self.cursor_x += direction
+            return True
+        return False # No kick needed
 
     def hold(self):
         if self.heldTile:
             self.loadedTiles[0], self.heldTile = self.heldTile, self.loadedTiles[0]
         else:
-            self.heldTile = self.loadedTiles[0]
-            self.loadedTiles[0] = self.loadedTiles[1]
-    
+            self.heldTile = self.loadedTiles.pop(0)
+            self.cursor_x = int((self.w - self.loadedTiles[0].size)/2)
+            self.cursor_y = 0 - self.loadedTiles[0].offsetT
+        
     def rotate(self, direction: int):
         self.loadedTiles[0].rotate(direction)
-        if self.checkCollision(self.cursor_x, self.cursor_y, checkD = True, checkL = True, checkR = True):
-            self.loadedTiles[0].rotate(-direction)
+        if self.kick(direction): return
+        self.loadedTiles[0].rotate(-direction) # If not possible, spin back
