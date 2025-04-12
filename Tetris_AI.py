@@ -3,12 +3,14 @@ pygame.init()
 
 import Game
 
-FPS = 15
+import Brain
+
+FPS = 10
 
 BOARD_COLS = 10
 BOARD_ROWS = 20
 BLOCK_SIZE = 10
-BORDER_WIDTH = max(1, int(BLOCK_SIZE/30))
+BORDER_WIDTH = 0.1
 
 BG_COLOR = "#98E5D9"
 GRID_COLOR = "#FFFFFF"
@@ -17,12 +19,16 @@ WINDOW_BG = "#111111"
 BOARD_WIDTH = BOARD_COLS * BLOCK_SIZE + BORDER_WIDTH * (BOARD_COLS - 1)
 BOARD_HEIGHT = BOARD_ROWS * BLOCK_SIZE + BORDER_WIDTH * (BOARD_ROWS - 1)
 
-POPULATION_COLS = 4
+POPULATION_COLS = 12
 POPULATION_ROWS = 4
-POPULATION_GAP = 3*BORDER_WIDTH
+POPULATION_GAP = 3
 
 WINDOW_WIDTH = POPULATION_COLS * BOARD_WIDTH + POPULATION_GAP * (POPULATION_COLS - 1)
 WINDOW_HEIGHT = POPULATION_ROWS * BOARD_HEIGHT + POPULATION_GAP * (POPULATION_ROWS - 1)
+
+trainer = Brain.Trainer(POPULATION_ROWS*POPULATION_COLS, [1]*8) # Create a trainer for the population, [] = not written yet
+
+players = trainer.initializePlayers(w=BOARD_COLS, h=BOARD_ROWS)
 
 def DrawBoard(b: Game.Board):
     surface = pygame.Surface((BOARD_WIDTH, BOARD_HEIGHT))
@@ -60,10 +66,6 @@ running = True
 window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 
-board = Game.Board(BOARD_COLS, BOARD_ROWS)
-
-cursor = [WINDOW_WIDTH - BLOCK_SIZE*2, 0]
-
 direction = ""
 
 while running:
@@ -71,35 +73,42 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             running = False
-
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                board.drop()
     if not running: break
-
-    pressed = pygame.key.get_pressed()
-
-    if pressed[pygame.K_DOWN]:
-        board.fall()
-    if pressed[pygame.K_LEFT]:
-        board.move(-1)
-    if pressed[pygame.K_RIGHT]:
-        board.move(+1)
-    if pressed[pygame.K_x]:
-        board.rotate(+1)
-    if pressed[pygame.K_z]:
-        board.rotate(-1)
-    if pressed[pygame.K_LSHIFT]:
-        board.hold()
 
     window.fill(WINDOW_BG)
 
+    if all([not p.alive for p in players]):
+        players = trainer.naturalSelection(players) # Override original
+        for p in players: p.reset() # score, clearCount = 0, re-alive
+
     for i in range(POPULATION_ROWS):
         for j in range(POPULATION_COLS):
-            surf = DrawBoard(board)
+            playerIndex = POPULATION_COLS*i + j
+
+            surf = DrawBoard(players[playerIndex])
             window.blit(surf, (j*(BOARD_WIDTH + POPULATION_GAP), i*(BOARD_HEIGHT + POPULATION_GAP)))
 
-    board.update()
+            if players[playerIndex].alive:
+                if not players[playerIndex].moves:
+                    players[playerIndex].moves = [] # TODO: AI Think new moves
+                move = players[playerIndex].moves.pop(0)
+
+                if move == "ML": 
+                    players[playerIndex].move(-1)
+                if move == "MR":
+                    players[playerIndex].move(1)
+                if move == "RL":
+                    players[playerIndex].rotate(-1)
+                if move == "RR":
+                    players[playerIndex].rotate(1)
+                if move == "HD":
+                    players[playerIndex].hold()
+                if move == "DP":
+                    players[playerIndex].drop()
+                players[playerIndex].update()
 
     pygame.display.update()
     clock.tick(FPS)
+
+
+# Question: why middle line thicker

@@ -19,7 +19,7 @@ class Board:
         self.board = [] # Empty board
         self.fillEmptyRows()
         
-        self.loadedTiles = []
+        self.loadedTiles = [] # TODO: Why only 7 tiles
         self.fillPreloadTiles()
 
         self.fallCounter = 0
@@ -42,7 +42,7 @@ class Board:
     def fillPreloadTiles(self):
         if len(self.loadedTiles) < len(Tiles.ALL):
             a = [random.shuffle(Tiles.ALL)]
-            self.loadedTiles.extend([tile() for tile in Tiles.ALL])
+            self.loadedTiles.extend([tile() for tile in Tiles.ALL]) # Add rand sequence of tiles 
 
     def checkCollision(self, x:int, y:int, checkD:bool = True, checkL:bool = True, checkR:bool = True) -> bool:
         if checkD: 
@@ -54,7 +54,7 @@ class Board:
         
         for xx in range(max(0, x), min(self.w, x + self.loadedTiles[0].size)): # Check if go into wall
             for yy in range(max(0, y), min(self.h, y + self.loadedTiles[0].size)):
-                if self.board[yy][xx] and self.loadedTiles[0].mass[yy - y][xx - x]: # mass[yy - y][xx - x] equals the cords of interest point relative to x, y (in py, null values: 0, ""... return false)
+                if self.board[yy][xx] and self.loadedTiles[0].mass[yy - y][xx - x]: # xx, yy = relative x, y
                     return True
         
         return False
@@ -122,11 +122,11 @@ class Board:
             self.cursor_y += 1
             return True
         # Check opposite side of rotation
-        if not self.checkClear(self.cursor_x - direction, self.cursor_y):
+        if not self.checkCollision(self.cursor_x - direction, self.cursor_y):
             self.cursor_x -= direction
             return True
         # Check same side of rotation
-        if not self.checkClear(self.cursor_x + direction, self.cursor_y):
+        if not self.checkCollision(self.cursor_x + direction, self.cursor_y):
             self.cursor_x += direction
             return True
         return False # No kick needed
@@ -136,8 +136,8 @@ class Board:
             self.loadedTiles[0], self.heldTile = self.heldTile, self.loadedTiles[0]
         else:
             self.heldTile = self.loadedTiles.pop(0)
-            self.cursor_x = int((self.w - self.loadedTiles[0].size)/2)
-            self.cursor_y = 0 - self.loadedTiles[0].offsetT
+        self.cursor_x = int((self.w - self.loadedTiles[0].size)/2)
+        self.cursor_y = 0 - self.loadedTiles[0].offsetT
         
     def rotate(self, direction: int):
         self.loadedTiles[0].rotate(direction)

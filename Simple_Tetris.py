@@ -3,11 +3,11 @@ pygame.init()
 
 import Game
 
-FPS = 15
+FPS = 7
 
 BOARD_COLS = 10
 BOARD_ROWS = 20
-BLOCK_SIZE = 40
+BLOCK_SIZE = 30
 BORDER_WIDTH = max(1, int(BLOCK_SIZE/30))
 
 BG_COLOR = "#98E5D9"
@@ -33,8 +33,6 @@ clock = pygame.time.Clock()
 
 board = Game.Board(BOARD_COLS, BOARD_ROWS)
 
-cursor = [WINDOW_WIDTH - BLOCK_SIZE*2, 0]
-
 direction = ""
 
 while running:
@@ -50,17 +48,17 @@ while running:
 
     pressed = pygame.key.get_pressed()
 
-    if pressed[pygame.K_DOWN]:
+    if pressed[pygame.K_DOWN] or pressed[pygame.K_s]:
         board.fall()
-    if pressed[pygame.K_LEFT]:
+    if pressed[pygame.K_LEFT] or pressed[pygame.K_a]:
         board.move(-1)
-    if pressed[pygame.K_RIGHT]:
+    if pressed[pygame.K_RIGHT] or pressed[pygame.K_d]:
         board.move(+1)
-    if pressed[pygame.K_x]:
+    if pressed[pygame.K_UP] or pressed[pygame.K_x]:
         board.rotate(+1)
-    if pressed[pygame.K_z]:
+    if pressed[pygame.K_RCTRL] or pressed[pygame.K_z]:
         board.rotate(-1)
-    if pressed[pygame.K_LSHIFT]:
+    if pressed[pygame.K_RSHIFT] or pressed[pygame.K_c]:
         board.hold()
 
     window.fill(GRID_COLOR)
