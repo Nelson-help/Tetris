@@ -1,5 +1,5 @@
 from . import Tiles # . => means this folder
-from typing import List
+
 from .Constants import FALL_DELAY, LOCK_DELAY
 
 import random
