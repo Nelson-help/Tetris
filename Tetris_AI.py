@@ -90,7 +90,13 @@ while running:
 
             if players[playerIndex].alive:
                 if not players[playerIndex].moves:
-                    players[playerIndex].moves = [] # TODO: AI Think new moves
+                    players[playerIndex].moves = brain.TetrisAI().Think(
+                        cursor_x = players[playerIndex].cursor_x,
+                        state = players[playerIndex].board,
+                        cur_tile = players[playerIndex].loadedTiles[0],
+                        hold = players[playerIndex].heldTile
+                        weights = players[playerIndex].weights
+                        )
                 move = players[playerIndex].moves.pop(0)
 
                 if move == "ML": 
@@ -109,6 +115,3 @@ while running:
 
     pygame.display.update()
     clock.tick(FPS)
-
-
-# Question: why middle line thicker
