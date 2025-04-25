@@ -1,4 +1,5 @@
 from Game import Board
+import copy import deepcopy
 import random 
 import json
 
@@ -49,6 +50,38 @@ class Player(Board):
             cost += functions[i]() * weights[i]
 
         return cost
+
+class TetrisAI:
+    def getFuture(self, x, state, tile): # "Left-most block in tile"'s x coord
+        simulator = Board(len(state[0]), len(state))
+        simulator.loadedTiles[0] = tile
+        simulator.board = state
+        simulator.cursor_x = x
+        simulator.drop() # Cursor is on the newest block, so sim = latest block
+        return simulator.board
+
+    def Think(self, state, cur_tile=None, hold=None, weights=[]):
+        bestMove = []
+        bestCost = float("inf")
+
+        starting = [
+            (current, []),
+            (hold, ["HD"])
+        ]    
+        for tile, moves in starting:
+            if tile is None or tile == "": continue
+            for rotate in range(4):
+                for x in range(-tile.offsetL, len(state[0]) + tile.offsetR - tile.size + 1): # +1 Cuz range exclude last, x is the cursor_x for each pos. sim.
+                    cost = calculateCost(self.getFuture(x, deepcopy(state), tile), weights)
+                    if cost < bestCost:
+                        bestCost = cost
+                        if x == cursor_x: bestMove= moves + ["RR"]*rotate
+                        elif x > cursor_x: bestMove= moves + ["RR"]*rotate + ["MR"]*(x - cursor_x)
+                        elif x < cursor_x: bestMove= moves + ["RR"]*rotate + ["ML"]*(cursor_x - x)
+                tile.rotate(+1)
+        return bestMove + ["DP", ]
+
+
     
 class Trainer:
     mutateRate = 0.1 # 越小 -> 訓練較慢但更精準 ， 越大 -> 訓練更快但偏差大
