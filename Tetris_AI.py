@@ -10,7 +10,7 @@ FPS = 10
 BOARD_COLS = 10
 BOARD_ROWS = 20
 BLOCK_SIZE = 10
-BORDER_WIDTH = 0.1
+BORDER_WIDTH = 0
 
 BG_COLOR = "#98E5D9"
 GRID_COLOR = "#FFFFFF"
@@ -26,25 +26,19 @@ POPULATION_GAP = 3
 WINDOW_WIDTH = POPULATION_COLS * BOARD_WIDTH + POPULATION_GAP * (POPULATION_COLS - 1)
 WINDOW_HEIGHT = POPULATION_ROWS * BOARD_HEIGHT + POPULATION_GAP * (POPULATION_ROWS - 1)
 
-trainer = Brain.Trainer(POPULATION_ROWS*POPULATION_COLS, [1]*8) # Create a trainer for the population, [] = not written yet
+trainer = Brain.Trainer(POPULATION_ROWS*POPULATION_COLS) # Create a trainer for the population, [] = not written yet
 
 players = trainer.initializePlayers(w=BOARD_COLS, h=BOARD_ROWS)
 
 def DrawBoard(b: Game.Board):
     surface = pygame.Surface((BOARD_WIDTH, BOARD_HEIGHT))
 
-    surface.fill(GRID_COLOR)
+    surface.fill(BG_COLOR)
 
     for i in range(BOARD_ROWS):
         for j in range(BOARD_COLS):
             if b.board[i][j]: # 1st board is class, second board is list
                 pygame.draw.rect(surface, b.board[i][j], 
-                                (j*(BLOCK_SIZE + BORDER_WIDTH), 
-                                i*(BLOCK_SIZE + BORDER_WIDTH), 
-                                BLOCK_SIZE - 2*BORDER_WIDTH, 
-                                BLOCK_SIZE - 2*BORDER_WIDTH))
-            else: 
-                pygame.draw.rect(surface, BG_COLOR, 
                                 (j*(BLOCK_SIZE + BORDER_WIDTH), 
                                 i*(BLOCK_SIZE + BORDER_WIDTH), 
                                 BLOCK_SIZE - 2*BORDER_WIDTH, 
@@ -90,11 +84,11 @@ while running:
 
             if players[playerIndex].alive:
                 if not players[playerIndex].moves:
-                    players[playerIndex].moves = brain.TetrisAI().Think(
+                    players[playerIndex].moves = Brain.TetrisAI().Think(
                         cursor_x = players[playerIndex].cursor_x,
                         state = players[playerIndex].board,
                         cur_tile = players[playerIndex].loadedTiles[0],
-                        hold = players[playerIndex].heldTile
+                        hold = players[playerIndex].heldTile,
                         weights = players[playerIndex].weights
                         )
                 move = players[playerIndex].moves.pop(0)

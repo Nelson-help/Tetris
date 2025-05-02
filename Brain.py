@@ -1,7 +1,9 @@
 from Game import Board
-import copy import deepcopy
+from copy import deepcopy
+from Cost import costFunctions
 import random 
 import json
+import os
 
 class Player(Board):
     moves: list
@@ -12,45 +14,6 @@ class Player(Board):
         self.weights = weights
         super().__init__(w, h)
 
-    def calculateCost(future, weights):
-        def getHoleCount(): # No. of holes
-            nonlocal future
-        def getPillarCount(): # No. of empty columns (peak at one)
-            nonlocal future
-        def getShapeHeight(): # Max height
-            nonlocal future
-        def getBumpiness(): # Sum of differences
-            nonlocal future
-        def getFillCount(): # No. tiles to fill to clear all
-            nonlocal future
-        def getBlockCountAboveHoles(): # Blocks above hole 
-            nonlocal future
-        def getHolesDist(): # Sum of roof to hole
-            nonlocal future
-        def getClearedCost(): # No. of lines I can clear after added block
-            nonlocal future
-            count = 0
-            for i in range(len(future)):
-                if all(future[i]): count -= 1
-            return count
-                    
-        functions = [
-            getHoleCount,
-            getPillarCount,
-            getShapeHeight,
-            getBumpiness,
-            getFillCount,
-            getBlockCountAboveHoles,
-            getHolesDist,
-            getClearedCost,
-        ]
-
-        cost = 0
-        for i in range(len(functions)):
-            cost += functions[i]() * weights[i]
-
-        return cost
-
 class TetrisAI:
     def getFuture(self, x, state, tile): # "Left-most block in tile"'s x coord
         simulator = Board(len(state[0]), len(state))
@@ -60,19 +23,22 @@ class TetrisAI:
         simulator.drop() # Cursor is on the newest block, so sim = latest block
         return simulator.board
 
-    def Think(self, state, cur_tile=None, hold=None, weights=[]):
+    def Think(self, cursor_x, state, cur_tile=None, hold=None, weights=[]):
         bestMove = []
         bestCost = float("inf")
 
         starting = [
-            (current, []),
+            (cur_tile, []),
             (hold, ["HD"])
         ]    
         for tile, moves in starting:
             if tile is None or tile == "": continue
             for rotate in range(4):
                 for x in range(-tile.offsetL, len(state[0]) + tile.offsetR - tile.size + 1): # +1 Cuz range exclude last, x is the cursor_x for each pos. sim.
-                    cost = calculateCost(self.getFuture(x, deepcopy(state), tile), weights)
+                    cost = 0
+                    future = self.getFuture(x, deepcopy(state), tile)
+                    for i in range(len(costFunctions)):
+                        cost += costFunctions[i](future) * weights[i]
                     if cost < bestCost:
                         bestCost = cost
                         if x == cursor_x: bestMove= moves + ["RR"]*rotate
@@ -88,13 +54,18 @@ class Trainer:
 
     path = "best.json"
 
-    def __init__(self, population, initWeight):
+    def __init__(self, population):
+        if os.path.exists(self.path): # Does it exist
+            with open(self.pat, "r") as f:
+                initWeight = json.load(f) # Load in previous weight
+            assert len(initWeight) == len(costFunctions)
+        else:
+            initWeight = [1]*len(costFunctions)
         self.population = population # 16
         self.initWeight = initWeight
         self.bestWeight = initWeight
         self.bestFitness = 0 # score
         self.generations = 0
-
 
     def initializePlayers(self, **kwargs): 
         players = [Player(**kwargs, weights=self.initWeight), ] # kwargs = keyboard arguments

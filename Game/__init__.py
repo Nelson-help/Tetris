@@ -92,6 +92,8 @@ class Board:
 
             self.cursor_x = int((self.w - self.loadedTiles[0].size)/2)
             self.cursor_y = 0 - self.loadedTiles[0].offsetT
+
+            if self.checkCollision(self.cursor_x, self.cursor_y, checkD=True, checkL=True, checkR=True): self.alive = False
     
     def fall(self):
         if self.checkCollision(self.cursor_x, self.cursor_y + 1, checkD = True, checkL = True, checkR = True): # Pretend go down
