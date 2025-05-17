@@ -47,17 +47,18 @@ class TetrisAI:
                 tile.rotate(+1)
         return bestMove + ["DP", ]
 
-
-    
 class Trainer:
-    mutateRate = 0.1 # 越小 -> 訓練較慢但更精準 ， 越大 -> 訓練更快但偏差大
+    mutateRate = 0.1 # The percent of mutation
 
     path = "best.json"
 
     def __init__(self, population):
         if os.path.exists(self.path): # Does it exist
-            with open(self.pat, "r") as f:
-                initWeight = json.load(f) # Load in previous weight
+            with open(self.path, "r") as f:
+                data = json.load(f)
+            initWeight = data["Weights"]
+            self.bestFitness = data["Score"]
+            self.generations = data["Generation"]
             assert len(initWeight) == len(costFunctions)
         else:
             initWeight = [1]*len(costFunctions)
@@ -74,7 +75,6 @@ class Trainer:
             players.append(Player(**kwargs, weights=weights))
         return players
 
-
     def mutate(self, weights):
         newWeights = []
         for i in range(len(weights)):
@@ -83,7 +83,6 @@ class Trainer:
             else:
                 newWeights.append(weights[i])
         return newWeights
-
 
     def naturalSelection(self, players):
         bestPlayerIndex = 0
@@ -99,13 +98,17 @@ class Trainer:
 
         self.generations += 1
 
-        with open(self.path, "w") as f:
-            json.dump(newPlayers[0].weights, f)
-
         text = ""
         text += f"\nGeneration {self.generations}"
         text += f"\n- Best Score {newPlayers[0].score}"
         text += f"\n- Best Weights {newPlayers[0].weights}"
         print(text)
+
+        with open(self.path, "w") as f:
+            json.dump({
+                "Generation": self.generations,
+                "Weights": newPlayers[0].weights,
+                "Score": newPlayers[0].score
+            }, f)
 
         return newPlayers
