@@ -10,7 +10,7 @@ class Board:
         self.h = h
         self.tileRandomizer = tileRandomizer
         self.reset()
-
+        
     def reset(self) -> None:
         self.alive = True
         self.score = 0
@@ -19,7 +19,7 @@ class Board:
         self.board = [] # Empty board
         self.fillEmptyRows()
         
-        self.loadedTiles = [] # TODO: Why only 7 tiles
+        self.loadedTiles = []
         self.fillPreloadTiles()
 
         self.fallCounter = 0
@@ -74,6 +74,7 @@ class Board:
                 count += 1
     
         self.clearCount += count
+        self.score = self.clearCount
         self.fillEmptyRows()
 
     def lock(self, instant):
