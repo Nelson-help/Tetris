@@ -5,7 +5,7 @@ import Game
 
 import Brain
 
-FPS = 10
+FPS = 30
 
 BOARD_COLS = 10
 BOARD_ROWS = 20
